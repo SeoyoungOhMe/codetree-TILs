@@ -182,6 +182,8 @@ void solution(vector<vector<int>>& board, vector<int>& wall) {
 }
 
 int main() {
+    ios_base :: sync_with_stdio(false); 
+    cin.tie(NULL); cout.tie(NULL); 
 
     cin >> k >> m;
     board.assign(5, vector<int>(5, 0));
