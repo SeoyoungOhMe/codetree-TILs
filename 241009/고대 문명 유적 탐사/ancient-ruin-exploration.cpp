@@ -10,8 +10,57 @@ vector<vector<int>> eachMiddleValue;
 vector<vector<int>> board2;
 vector<int> wall;
 
-isRange(int x, int y) {
+bool isRange(int x, int y) {
     return (0 <= x && x < 5 && 0 <= y && y < 5);
+}
+
+vector<vector<bool>> visited;
+int bfs(vector<vector<int>>& board) { // 연결된 유물의 총 개수를 반환
+    visited.assign(5, vector<bool>(5,false));
+    vector<int> dx = {0, 1, 0, -1};
+    vector<int> dy = {1, 0, -1, 0};
+    int answer=0;
+    stack<pair<int, int>> s;
+
+    for (int i=0; i<5; i++) {
+        for (int j=0; j<5; j++) {
+            if (board[i][j] != 0 && !visited[i][j]) {
+                queue<pair<int, int>> q;
+                q.push({i, j});
+                visited[i][j] = true;
+                int cnt = 0;
+                s.push({i, j});
+
+                while(!q.empty()) {
+                    pair<int, int> current_v = q.front();
+                    int x = current_v.first;
+                    int y = current_v.second;
+                
+                    for (int i=0; i<4; i++) {
+                        int nx = x + dx[i];
+                        int ny = y + dy[i];
+
+                        if (isRange(nx, ny) && board[x][y] == board[nx][ny] && !visited[nx][ny]) {
+                            visited[nx][ny] = true;
+                            q.push({nx, ny});
+                            s.push({nx, ny});
+                        }
+                    }
+                }
+
+                if (cnt >= 3) {
+                    answer += cnt;
+                    for (int k=0; k<cnt; k++) {
+                        pair<int, int> spot = s.top();
+                        s.pop();
+                        board[spot.first][spot.second] = 0;
+                    }
+                }
+            }
+        }
+    }
+    
+    return answer;
 }
 
 vector<vector<int>> rotate(vector<vector<int>> board, int angle, int x, int y) {
@@ -81,55 +130,6 @@ void changeBoard(vector<vector<int>>& board) {
     board = rotate(board, max_angle, x, y);
 }
 
-vector<vector<bool>> visited;
-int bfs(vector<vector<int>>& board) { // 연결된 유물의 총 개수를 반환
-    visited.assign(5, vector<bool>(5,false));
-    vector<int> dx = {0, 1, 0, -1};
-    vector<int> dy = {1, 0, -1, 0};
-    int answer=0;
-    stack<int> s;
-
-    for (int i=0; i<5; i++) {
-        for (int j=0; j<5; j++) {
-            if (board[i][j] != 0 && !visited[i][j]) {
-                queue<pair<int, int>> q;
-                q.push({i, j});
-                visited[i, j] = true;
-                int cnt = 0;
-                s.push({i, j});
-
-                while(!q.empty()) {
-                    int current_v = q.front();
-                    int x = current_v.first;
-                    int y = current_v.second;
-                
-                    for (int i=0; i<4; i++) {
-                        int nx = x + dx[i];
-                        int ny = y + dy[i];
-
-                        if (isRange(nx, ny) && board[x][y] == board[nx][ny] && !visited[nx][ny]) {
-                            visited[nx][ny] = true;
-                            q.push({nx, ny});
-                            s.push({nx, ny});
-                        }
-                    }
-                }
-
-                if (cnt >= 3) {
-                    answer += cnt;
-                    for (int k=0; k<cnt; k++) {
-                        int x, y = s.top();
-                        s.pop();
-                        board[x][y] = 0;
-                    }
-                }
-            }
-        }
-    }
-    
-    return answer;
-}
-
 void fillBlank(vector<vector<int>>& board) {
     for (int i=4; i>=0; i--) { // 열
         for (int j=4; j>=0; j--) { // 행
@@ -173,7 +173,7 @@ void solution(vector<vector<int>>& board, vector<int>& wall) {
             int value = bfs(board); // 서로 연결돼있는 유물 구하기
             answer += value;
 
-            fillBlank();
+            fillBlank(board);
         }
 
 
